@@ -1,0 +1,11 @@
+menu "QR Code Generator"
+
+config QR_CODE_SCL_PIN
+    int "Default SCL pin number"
+    default 22
+
+config QR_CODE_SDA_PIN
+    int "Default SDA pin number"
+    default 21
+
+endmenu
