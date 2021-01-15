@@ -37,7 +37,7 @@
 
 #if LOCK_VERSION == 0
 
-static const char *TAG = "QRCODE";
+
 
 static const uint16_t NUM_ERROR_CORRECTION_CODEWORDS[4][40] = {
     // 1,  2,  3,  4,  5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,   25,   26,   27,   28,   29,   30,   31,   32,   33,   34,   35,   36,   37,   38,   39,   40    Error correction level
@@ -1038,53 +1038,4 @@ bool qrcode_getModule(QRCode *qrcode, uint8_t x, uint8_t y)
 
     uint32_t offset = y * qrcode->size + x;
     return (qrcode->modules[offset >> 3] & (1 << (7 - (offset & 0x07)))) != 0;
-}
-
-void display_qrcode(const char *data)
-{
-    u8g2_esp32_hal_t u8g2_esp32_hal = U8G2_ESP32_HAL_DEFAULT;
-    u8g2_esp32_hal.sda = PIN_SDA;
-    u8g2_esp32_hal.scl = PIN_SCL;
-    u8g2_esp32_hal_init(u8g2_esp32_hal);
-
-    u8g2_t u8g2; // a structure which will contain all the data for one display
-    u8g2_Setup_ssd1306_i2c_128x32_univision_f(
-        &u8g2,
-        U8G2_R0,
-        //u8x8_byte_sw_i2c,
-        u8g2_esp32_i2c_byte_cb,
-        u8g2_esp32_gpio_and_delay_cb); // init u8g2 structure
-    u8x8_SetI2CAddress(&u8g2.u8x8, 0x78);
-
-    ESP_LOGI(TAG, "u8g2_InitDisplay");
-    u8g2_InitDisplay(&u8g2); // send init sequence to the display, display is in sleep mode after this,
-    ESP_LOGI(TAG, "u8g2_SetPowerSave");
-    u8g2_SetPowerSave(&u8g2, 0); // wake up display
-    ESP_LOGI(TAG, "u8g2_ClearBuffer");
-    u8g2_ClearBuffer(&u8g2);
-
-    QRCode qrcode;
-    uint8_t qrcodeData[qrcode_getBufferSize(3)];
-    qrcode_initText(&qrcode, qrcodeData, 3, 0, data);
-
-    ESP_LOGI(TAG, "Displaying the Qr code on OLED");
-    uint8_t z = 0;
-    for (uint8_t y = 0; y < qrcode.size; y++)
-    {
-        for (uint8_t x = 0; x < qrcode.size; x++)
-        {
-            // for printing the qr code on terminal
-            printf(qrcode_getModule(&qrcode, x, y) ? "\u2588\u2588" : "  ");
-            if (qrcode_getModule(&qrcode, x, y))
-            {
-                u8g2_DrawPixel(&u8g2, x + 35 + z, y);
-            }
-            z++;
-        }
-        z = 0;
-        printf("\n");
-    }
-
-    u8g2_SendBuffer(&u8g2);
-    vTaskDelete(NULL);
 }

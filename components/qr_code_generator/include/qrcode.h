@@ -41,15 +41,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "sdkconfig.h"
-#include "u8g2_esp32_hal.h"
-#include <driver/gpio.h>
-#include <driver/spi_master.h>
-#include <esp_log.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 #include <stdio.h>
-#include <u8g2.h>
+
 
 // QR Code Format Encoding
 #define MODE_NUMERIC 0
@@ -68,11 +61,6 @@
 #define LOCK_VERSION 0
 #endif
 
-// SDA - GPIO21
-#define PIN_SDA CONFIG_QR_CODE_SDA_PIN
-
-// SCL - GPIO22
-#define PIN_SCL CONFIG_QR_CODE_SCL_PIN
 
 typedef struct QRCode
 {
@@ -95,7 +83,6 @@ extern "C"
     int8_t qrcode_initBytes(QRCode *qrcode, uint8_t *modules, uint8_t version, uint8_t ecc, uint8_t *data, uint16_t length);
 
     bool qrcode_getModule(QRCode *qrcode, uint8_t x, uint8_t y);
-    void display_qrcode(const char *data);
 
 #ifdef __cplusplus
 }
