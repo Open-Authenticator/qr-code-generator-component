@@ -1,31 +1,53 @@
-#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
-#include "qrcode.h"
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "esp_log.h"
 
+#include "qrcodegen.h"
+#include "bitmap.h"
 
-void app_main(void)
+#define TAG "QRCODE"
+
+int app_main()
 {
 
-   // initialising the QR code structure
-   QRCode qrcode;
+   // Text to be written as QRcode
+   const char *text = "http:192.168.1.1";
 
-   // specifying the version of qrcode to use
-   uint8_t version = 2;
+   // setting the error correction level
+   enum qrcodegen_Ecc errCorLvl = qrcodegen_Ecc_LOW;
 
-   // The array to store the bitmap data of the qrcode
-   uint8_t qrcodeData[qrcode_getBufferSize(version)];
+   // setting the version of the qrcode
+   uint8_t version = 1;
 
-   // initialising the qrcode with the text Data
-   qrcode_initText(&qrcode, qrcodeData, version, 0, "https://192.168.1.1");
+   // creating the qrcode buffer
+   uint8_t qrcode[qrcodegen_BUFFER_LEN_FOR_VERSION(version)];
+   uint8_t tempBuffer[qrcodegen_BUFFER_LEN_FOR_VERSION(version)];
 
-   // Printing the bitmap matrix of the image
-   for (uint8_t y = 0; y < qrcode.size; y++)
+   // creating the QR code
+   bool ok = qrcodegen_encodeText(text, tempBuffer, qrcode, errCorLvl, version, version, qrcodegen_Mask_AUTO, true);
+   if (ok)
    {
-      for (uint8_t x = 0; x < qrcode.size; x++)
-      {
-         printf("%d ", qrcodeData[x + y]);
-      }
-      printf("\n");
+      ESP_LOGI(TAG, "QRcode successfully created");
    }
 
+   uint8_t size = qrcodegen_getSize(qrcode);
+
+   uint8_t arr_bitmap[(size * ((2 * size + 7) / 8))];
+   memset(arr_bitmap, 0, sizeof(arr_bitmap));
+
+   // converting the qrcode buffer to bitmap array
+   qrcode_to_bitmap(qrcode, (uint8_t *)&arr_bitmap, version);
+
+   // printing the bitmap array
+   printf("Bitmap Array:-\n");
+   for (int i = 0; i < sizeof(arr_bitmap); i++)
+   {
+      printf("%d ,", arr_bitmap[i]);
+   }
+
+   return 0;
 }
