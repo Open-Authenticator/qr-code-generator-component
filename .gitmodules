@@ -1,3 +1,0 @@
-[submodule "components/qr_code/QR-Code-generator"]
-	path = components/qr_code/QR-Code-generator
-	url = https://github.com/nayuki/QR-Code-generator.git
